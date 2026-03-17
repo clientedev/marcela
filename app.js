@@ -73,7 +73,6 @@ async function readExcel(file) {
 
 // ---- Data Processing & Mapping ----
 function processData(rawRows) {
-  // Column Mapping based on User requirements
   const map = {
     id: "ID",
     horaInicio: "Hora de início",
@@ -110,17 +109,15 @@ function processData(rawRows) {
   allData = rawRows.map((row, idx) => {
     const record = {};
     for (const [key, columnName] of Object.entries(map)) {
-      // Fuzzy match for column name if exact not found
       let value = row[columnName];
       if (value === undefined) {
-         // Try finding key that contains the substring (case insensitive)
          const actualKey = Object.keys(row).find(k => k.toLowerCase().includes(columnName.toLowerCase()));
          value = actualKey ? row[actualKey] : "";
       }
       record[key] = String(value || "").trim();
     }
 
-    // Cleanup phone numbers in text fields
+    // STRICT CLEANUP
     if (record.estadoCivil && /\d{8,}/.test(record.estadoCivil)) record.estadoCivil = "Não informado";
     if (record.filhos && /\d{8,}/.test(record.filhos)) record.filhos = "Não informado";
 
@@ -131,21 +128,16 @@ function processData(rawRows) {
         if (parts.length === 3) {
             let y = parseInt(parts[2]);
             if (y < 2000) y += 2000;
-            const m = parseInt(parts[0]);
+            const m = parseInt(parts[1]); // Fixed month index (MM/DD or DD/MM - assuming MM/DD for Semester)
             record.semestre = `${y}-${m <= 6 ? 1 : 2}`;
-        } else {
-            record.semestre = "Desconhecido";
-        }
-    } else {
-        record.semestre = "Desconhecido";
-    }
+        } else record.semestre = "Desconhecido";
+    } else record.semestre = "Desconhecido";
 
     return record;
   }).filter(r => r.nome && r.nome.length > 2);
 
   filteredData = [...allData];
   
-  // Show/Hide filter and results
   document.getElementById('semesterFilterContainer').style.display = allData.length ? 'flex' : 'none';
   document.getElementById('totalCount').textContent = allData.length;
   document.getElementById('footerTotal').textContent = allData.length;
@@ -154,7 +146,7 @@ function processData(rawRows) {
   renderAll();
 }
 
-// ---- Normalization Helpers ----
+// ---- Normalization Helpers (STRICT) ----
 function parseAge(str) {
   if (!str) return null;
   const num = parseInt(str.replace(/\D/g, ''));
@@ -170,62 +162,42 @@ function getAgeBand(age) {
 }
 
 function hasChildren(val) {
-  if (!val || val.trim() === '') return 'Não informado';
+  if (!val) return 'Não';
   const v = val.toLowerCase().trim();
-  if (v === 'nenhum' || v === 'não' || v === 'nao' || v.includes('não') || v.includes('nao')) return 'Não';
-  if (v.includes('sim') || v === '1' || v === '2' || v.includes('tenho')) return 'Sim';
-  return 'Não informado';
+  if (v === 'sim' || v === '1' || v.includes('tenho') || v === 'yes') return 'Sim';
+  return 'Não';
 }
 
 function normalizeCourse(c) {
   if (!c) return 'Outro';
   if (c.includes('Logística')) return 'Téc. Logística';
-  if (c.includes('SEDUC')) return 'Des. Sistemas (SEDUC)';
-  if (c.includes('SESI/SENAI')) return 'Des. Sistemas (SESI/SENAI)';
-  if (c.includes('INTEGRAL SESI')) return 'Des. Sistemas (SESI)';
   if (c.includes('Desenvolvimento') || c.includes('Sistemas')) return 'Des. Sistemas';
-  if (c.includes('CAI') || c.includes('Operador')) return 'CAI Op. Logísticos';
+  if (c.includes('CAI')) return 'CAI';
   return 'Outro';
 }
 
 function normalizeWork(w) {
-  if (!w) return 'N/I';
+  if (!w) return 'Não';
   const wl = w.toLowerCase();
-  if (wl.includes('informal') || wl.includes('informais')) return 'Informal';
-  if (wl === 'sim' || wl.includes('aprendiz') || wl.includes('estagiário') || wl.includes('trabalhando') || wl.includes('outro')) return 'Sim';
-  if (wl === 'não' || wl === 'nao' || wl.includes('não') || wl.includes('nao')) return 'Não';
-  return 'N/I';
+  if (wl === 'sim' || wl.includes('estágio') || wl.includes('aprendiz') || wl.includes('trabalhando')) return 'Sim';
+  return 'Não';
 }
 
 function normalizeEducation(e) {
   if (!e) return 'N/I';
   if (e.includes('completo')) return 'EM Completo';
-  if (e.includes('cursando') && e.includes('Ensino Médio')) return 'Cursando EM';
-  if (e.includes('superior')) return 'Nível Superior';
+  if (e.includes('cursando')) return 'Cursando EM';
+  if (e.includes('superior')) return 'Superior';
   return 'Outro';
 }
 
 function normalizeTransport(val) {
-  if (!val) return 'N/I';
+  if (!val) return 'Outro';
   const v = val.toLowerCase();
-  if (v.includes('ônibus') || v.includes('onibus')) return 'Ônibus';
-  if (v.includes('metrô') || v.includes('metro')) return 'Metrô';
-  if (v.includes('trem')) return 'Trem';
-  if (v.includes('carro')) return 'Carro';
-  if (v.includes('moto')) return 'Moto';
-  if (v.includes('a pé') || v.includes('caminhando') || v.includes('pe')) return 'A pé';
-  if (v.includes('bicicleta') || v.includes('bike')) return 'Bicicleta';
-  if (v.includes('van')) return 'Van Escolar';
-  return 'Outro';
-}
-
-function getTransportCategory(val) {
-  if (!val) return 'N/I';
-  const v = val.toLowerCase();
-  if (v.includes('ônibus') || v.includes('metrô') || v.includes('trem') || v.includes('van')) return 'Público';
+  if (v.includes('ônibus') || v.includes('onibus') || v.includes('metrô') || v.includes('metro') || v.includes('trem')) return 'Público';
   if (v.includes('carro') || v.includes('moto')) return 'Privado';
-  if (v.includes('a pé') || v.includes('bicicleta')) return 'Ativo';
-  return 'Privado';
+  if (v.includes('pé') || v.includes('bicicleta') || v.includes('bike')) return 'Ativo';
+  return 'Outro';
 }
 
 // ---- Filtering Logic ----
@@ -244,42 +216,30 @@ function applyFilters() {
   filteredData = allData.filter(r => {
     if (fSemestre && r.semestre !== fSemestre) return false;
     if (fGenero && r.genero !== fGenero) return false;
-    
     if (fIdade) {
       const age = parseAge(r.idade);
       if (!age || getAgeBand(age) !== fIdade) return false;
     }
-
     if (fEstadoCivil && !r.estadoCivil.includes(fEstadoCivil)) return false;
-
     if (fFilhos) {
-      const status = hasChildren(r.filhos);
-      if (fFilhos === 'sim' && status !== 'Sim') return false;
-      if (fFilhos === 'nao' && status !== 'Não') return false;
+      const status = hasChildren(r.filhos).toLowerCase();
+      if (fFilhos !== status) return false;
     }
-
     if (fRegiao && r.regiao !== fRegiao) return false;
-    
     if (fCurso) {
-      const norm = normalizeCourse(r.curso);
-      const map = { logistica: 'Téc. Logística', ds_seduc: 'Des. Sistemas (SEDUC)', cai: 'CAI Op. Logísticos' };
-      if (map[fCurso] && norm !== map[fCurso]) return false;
+      const norm = normalizeCourse(r.curso).toLowerCase();
+      if (!norm.includes(fCurso)) return false;
     }
-
     if (fEscolaridade) {
         const ne = normalizeEducation(r.escolaridade);
         if (fEscolaridade === 'completo' && ne !== 'EM Completo') return false;
         if (fEscolaridade === 'cursando' && ne !== 'Cursando EM') return false;
     }
-
     if (fTrabalha) {
-      const nw = normalizeWork(r.trabalha);
-      if (fTrabalha === 'sim' && nw !== 'Sim') return false;
-      if (fTrabalha === 'nao' && nw !== 'Não') return false;
+      const nw = normalizeWork(r.trabalha).toLowerCase();
+      if (fTrabalha !== nw) return false;
     }
-
     if (fPeriodo && !r.periodo.includes(fPeriodo)) return false;
-
     return true;
   });
 
@@ -306,8 +266,7 @@ function initSidebar() {
 function updateActiveFilters() {
   const container = document.getElementById('activeFilters');
   const filters = [];
-  const selects = document.querySelectorAll('.sidebar select');
-  selects.forEach(sel => {
+  document.querySelectorAll('.sidebar select').forEach(sel => {
     if (sel.value) {
       const label = sel.closest('.filter-group').querySelector('label').textContent;
       const text = sel.options[sel.selectedIndex].text;
@@ -357,15 +316,13 @@ function initSemesterFilter() {
   }
 }
 
-// ---- Chart Rendering ----
+// ---- Chart Rendering (Simplified) ----
 function renderAll() {
   if (allData.length === 0) return;
   renderKPIs();
-  renderDemographics();
-  renderEducation();
-  renderBehavior();
-  renderCorrelations();
-  renderTransportAndSemesters();
+  renderSection1();
+  renderSection2();
+  renderSection3();
 }
 
 function destroyChart(id) {
@@ -387,16 +344,14 @@ function createDoughnut(canvasId, labels, values) {
         data: values,
         backgroundColor: COLORS.soft.slice(0, labels.length),
         borderColor: COLORS.primary.slice(0, labels.length),
-        borderWidth: 2,
+        borderWidth: 1,
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      cutout: '65%',
-      plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 10 } } },
-      }
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } }
     }
   });
 }
@@ -411,8 +366,8 @@ function createBar(canvasId, labels, values, horizontal = false) {
       labels,
       datasets: [{
         data: values,
-        backgroundColor: labels.map((_, i) => COLORS.soft[i % COLORS.soft.length]),
-        borderColor: labels.map((_, i) => COLORS.primary[i % COLORS.primary.length]),
+        backgroundColor: COLORS.soft[0],
+        borderColor: COLORS.primary[0],
         borderWidth: 1,
         borderRadius: 4
       }]
@@ -420,28 +375,11 @@ function createBar(canvasId, labels, values, horizontal = false) {
     options: {
       indexAxis: horizontal ? 'y' : 'x',
       responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
-        x: { ticks: { font: { size: 10 } } }
-      }
-    }
-  });
-}
-
-function createGroupedBar(canvasId, labels, datasets) {
-  destroyChart(canvasId);
-  const ctx = document.getElementById(canvasId);
-  if (!ctx) return;
-  charts[canvasId] = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
-      scales: {
-        y: { beginAtZero: true },
-        x: { ticks: { font: { size: 10 } } }
+        y: { beginAtZero: true, ticks: { font: { size: 9 } } },
+        x: { ticks: { font: { size: 9 } } }
       }
     }
   });
@@ -456,160 +394,88 @@ function renderKPIs() {
   const ages = filteredData.map(r => parseAge(r.idade)).filter(Boolean);
   const avgAge = ages.length ? (ages.reduce((a, b) => a + b, 0) / ages.length).toFixed(1) : '—';
   document.getElementById('kpiIdadeMedia').textContent = avgAge;
-  document.getElementById('kpiIdadeRange').textContent = ages.length ? `${Math.min(...ages)}-${Math.max(...ages)} anos` : '';
 
   const masc = filteredData.filter(r => r.genero === 'Masculino').length;
   const fem = filteredData.filter(r => r.genero === 'Feminino').length;
-  document.getElementById('kpiMasc').textContent = masc;
-  document.getElementById('kpiFem').textContent = fem;
-  document.getElementById('kpiMascPct').textContent = total ? `${((masc / total) * 100).toFixed(1)}%` : '';
-  document.getElementById('kpiFemPct').textContent = total ? `${((fem / total) * 100).toFixed(1)}%` : '';
+  document.getElementById('kpiMascPct').textContent = total ? `${((masc / total) * 100).toFixed(0)}%` : '0%';
+  document.getElementById('kpiFemPct').textContent = total ? `${((fem / total) * 100).toFixed(0)}%` : '0%';
 
-  const comFilhos = filteredData.filter(r => hasChildren(r.filhos) === 'Sim').length;
-  document.getElementById('kpiFilhos').textContent = comFilhos;
-  document.getElementById('kpiFilhosPct').textContent = total ? `${((comFilhos / total) * 100).toFixed(1)}%` : '';
+  const trabalha = filteredData.filter(r => normalizeWork(r.trabalha) === 'Sim').length;
+  document.getElementById('kpiTrabPct').textContent = total ? `${((trabalha / total) * 100).toFixed(0)}%` : '0%';
+
+  const filhos = filteredData.filter(r => hasChildren(r.filhos) === 'Sim').length;
+  document.getElementById('kpiFilhosPct').textContent = total ? `${((filhos / total) * 100).toFixed(0)}%` : '0%';
 }
 
-function renderDemographics() {
+function renderSection1() {
   const data = filteredData;
-  // Gender
-  const gCounts = {};
+  const gCounts = { 'Masculino': 0, 'Feminino': 0, 'Outro': 0 };
   data.forEach(r => gCounts[r.genero] = (gCounts[r.genero] || 0) + 1);
   createDoughnut('chartGenero', Object.keys(gCounts), Object.values(gCounts));
 
-  // Age Bands
-  const bands = { '13-15': 0, '16-17': 0, '18-20': 0, '21-25': 0, '26+': 0 };
-  data.forEach(r => {
-    const age = parseAge(r.idade);
-    if (age) bands[getAgeBand(age)]++;
-  });
-  createBar('chartIdade', Object.keys(bands), Object.values(bands));
+  const ageBands = { '13-15': 0, '16-17': 0, '18-20': 0, '21-25': 0, '26+': 0 };
+  data.forEach(r => { const a = parseAge(r.idade); if(a) ageBands[getAgeBand(a)]++; });
+  createBar('chartIdade', Object.keys(ageBands), Object.values(ageBands));
 
-  // Civil
-  const cCounts = {};
-  data.forEach(r => {
-      const c = r.estadoCivil || "N/I";
-      cCounts[c] = (cCounts[c] || 0) + 1;
-  });
-  createDoughnut('chartEstadoCivil', Object.keys(cCounts), Object.values(cCounts));
+  const ecCounts = {};
+  data.forEach(r => { const ec = r.estadoCivil || 'N/I'; ecCounts[ec] = (ecCounts[ec] || 0) + 1; });
+  createDoughnut('chartEstadoCivil', Object.keys(ecCounts), Object.values(ecCounts));
 
-  // Children
-  const fStatus = { 'Com filhos': 0, 'Sem filhos': 0, 'Não informado': 0 };
-  data.forEach(r => {
-      const s = hasChildren(r.filhos);
-      if (s === 'Sim') fStatus['Com filhos']++;
-      else if (s === 'Não') fStatus['Sem filhos']++;
-      else fStatus['Não informado']++;
-  });
-  createDoughnut('chartFilhos', Object.keys(fStatus), Object.values(fStatus));
+  const courseCounts = {};
+  data.forEach(r => { const c = normalizeCourse(r.curso); courseCounts[c] = (courseCounts[c] || 0) + 1; });
+  createBar('chartCursos', Object.keys(courseCounts), Object.values(courseCounts), true);
 
-  // Region
-  const rCounts = {};
-  data.forEach(r => {
-      const reg = r.regiao || "N/I";
-      rCounts[reg] = (rCounts[reg] || 0) + 1;
-  });
-  createBar('chartRegiao', Object.keys(rCounts), Object.values(rCounts));
-
-  renderTreemap();
+  const edCounts = {};
+  data.forEach(r => { const ed = normalizeEducation(r.escolaridade); edCounts[ed] = (edCounts[ed] || 0) + 1; });
+  createDoughnut('chartEscolaridade', Object.keys(edCounts), Object.values(edCounts));
 }
 
-function renderTreemap() {
-    const container = document.getElementById('treemapBairro');
-    container.innerHTML = '';
-    const bCounts = {};
-    filteredData.forEach(r => {
-        if (!r.bairro) return;
-        let b = r.bairro.split(',')[0].split('-')[0].trim();
-        b = b.charAt(0).toUpperCase() + b.slice(1).toLowerCase();
-        if (b.length < 3) return;
-        bCounts[b] = (bCounts[b] || 0) + 1;
-    });
-    const sorted = Object.entries(bCounts).sort((a,b) => b[1]-a[1]).slice(0, 15);
-    sorted.forEach(([b, c], i) => {
-        const el = document.createElement('div');
-        el.className = 'treemap-item';
-        el.style.backgroundColor = COLORS.primary[i % COLORS.primary.length];
-        el.style.flex = `1 1 ${c * 40}px`;
-        el.innerHTML = `<span class="treemap-count">${c}</span><span class="treemap-label">${b}</span>`;
-        container.appendChild(el);
-    });
-}
-
-function renderEducation() {
+function renderSection2() {
   const data = filteredData;
-  // Courses
-  const cCounts = {};
-  data.forEach(r => {
-      const n = normalizeCourse(r.curso);
-      cCounts[n] = (cCounts[n] || 0) + 1;
-  });
-  createBar('chartCursos', Object.keys(cCounts), Object.values(cCounts), true);
+  const transCounts = { 'Público': 0, 'Privado': 0, 'Ativo': 0, 'Outro': 0 };
+  data.forEach(r => transCounts[normalizeTransport(r.tipoConducao)]++);
+  createDoughnut('chartTiposConducao', Object.keys(transCounts), Object.values(transCounts));
 
-  // School Type
-  const sCounts = {};
-  data.forEach(r => {
-      let t = r.tipoEscola || "N/I";
-      if (t.includes("Pública")) t = "Pública";
-      if (t.includes("Particular")) t = "Particular";
-      sCounts[t] = (sCounts[t] || 0) + 1;
-  });
-  createDoughnut('chartTipoEscola', Object.keys(sCounts), Object.values(sCounts));
-  
-  renderWordCloud();
+  const timeCounts = {};
+  data.forEach(r => { const t = r.tempoDeslocamento || 'N/I'; timeCounts[t] = (timeCounts[t] || 0) + 1; });
+  createBar('chartDeslocamento', Object.keys(timeCounts), Object.values(timeCounts));
+
+  const perCounts = {};
+  data.forEach(r => { const p = r.periodo || 'N/I'; perCounts[p] = (perCounts[p] || 0) + 1; });
+  createDoughnut('chartPeriodo', Object.keys(perCounts), Object.values(perCounts));
+
+  const workCounts = { 'Trabalha': 0, 'Não Trabalha': 0 };
+  data.forEach(r => normalizeWork(r.trabalha) === 'Sim' ? workCounts['Trabalha']++ : workCounts['Não Trabalha']++);
+  createDoughnut('chartTrabalha', Object.keys(workCounts), Object.values(workCounts));
+
+  const schoolType = {};
+  data.forEach(r => { const t = r.tipoEscola || 'N/I'; schoolType[t] = (schoolType[t] || 0) + 1; });
+  createBar('chartTipoEscola', Object.keys(schoolType), Object.values(schoolType), true);
 }
 
-function renderWordCloud() {
-    const container = document.getElementById('wordCloud');
-    container.innerHTML = '';
-    const wordCounts = {};
-    const stops = ['de','do','da','com','para','para','que','uma','curso','curso','senai'];
-    filteredData.forEach(r => {
-        if (!r.motivosCurso) return;
-        r.motivosCurso.toLowerCase().split(/\s+/).forEach(w => {
-            if (w.length > 3 && !stops.includes(w)) wordCounts[w] = (wordCounts[w] || 0) + 1;
-        });
-    });
-    const sorted = Object.entries(wordCounts).sort((a,b)=>b[1]-a[1]).slice(0, 30);
-    sorted.forEach(([w, c]) => {
-        const span = document.createElement('span');
-        span.className = 'word-cloud-item';
-        span.style.fontSize = `${0.8 + (c/sorted[0][1])*1.5}rem`;
-        span.textContent = w;
-        container.appendChild(span);
-    });
-}
-
-function renderBehavior() {
-    createDoughnut('chartTrabalha', ['Sim', 'Não', 'Informal'], [
-        filteredData.filter(r => normalizeWork(r.trabalha) === 'Sim').length,
-        filteredData.filter(r => normalizeWork(r.trabalha) === 'Não').length,
-        filteredData.filter(r => normalizeWork(r.trabalha) === 'Informal').length
-    ]);
-}
-
-function renderCorrelations() {
-    // Basic Gender/Course
-    const courses = ['Téc. Logística', 'Des. Systems', 'CAI'];
-    const ds = [
-        { label: 'Masc', data: [10, 5, 8], backgroundColor: COLORS.primary[0] },
-        { label: 'Fem', data: [12, 10, 2], backgroundColor: COLORS.primary[6] }
-    ];
-    // This part would need dynamic calc from filteredData... keeping structure simple for now
-    // createGroupedBar('chartGeneroCurso', courses, ds);
-}
-
-function renderTransportAndSemesters() {
+function renderSection3() {
   const data = filteredData;
-  const transportCounts = {};
-  data.forEach(r => {
-      const t = normalizeTransport(r.tipoConducao);
-      transportCounts[t] = (transportCounts[t] || 0) + 1;
-  });
-  createDoughnut('chartTiposConducao', Object.keys(transportCounts), Object.values(transportCounts));
-  
-  const semCounts = {};
-  allData.forEach(r => semCounts[r.semestre] = (semCounts[r.semestre] || 0) + 1);
-  const sKeys = Object.keys(semCounts).sort();
-  createBar('chartEvolucaoSemestre', sKeys, sKeys.map(k => semCounts[k]));
+  const childCounts = { 'Sim': 0, 'Não': 0 };
+  data.forEach(r => hasChildren(r.filhos) === 'Sim' ? childCounts['Sim']++ : childCounts['Não']++);
+  createDoughnut('chartFilhos', Object.keys(childCounts), Object.values(childCounts));
+
+  const incomeCounts = {};
+  data.forEach(r => { const i = r.rendaFamiliar || 'N/I'; incomeCounts[i] = (incomeCounts[i] || 0) + 1; });
+  createBar('chartRenda', Object.keys(incomeCounts), Object.values(incomeCounts), true);
+
+  const finCounts = {};
+  data.forEach(r => { const f = r.situacaoFinanceira || 'N/I'; finCounts[f] = (finCounts[f] || 0) + 1; });
+  createBar('chartFinanceira', Object.keys(finCounts), Object.values(finCounts));
+
+  const regCounts = {};
+  data.forEach(r => { const reg = r.regiao || 'N/I'; regCounts[reg] = (regCounts[reg] || 0) + 1; });
+  createBar('chartRegiao', Object.keys(regCounts), Object.values(regCounts));
+
+  const resCounts = {};
+  data.forEach(r => { const res = r.residencia || 'N/I'; resCounts[res] = (resCounts[res] || 0) + 1; });
+  createDoughnut('chartResidencia', Object.keys(resCounts), Object.values(resCounts));
+
+  const relCounts = {};
+  data.forEach(r => { const rel = r.religiao || 'N/I'; relCounts[rel] = (relCounts[rel] || 0) + 1; });
+  createBar('chartReligiao', Object.keys(relCounts), Object.values(relCounts), true);
 }

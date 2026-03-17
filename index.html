@@ -126,7 +126,7 @@
       <!-- Header -->
       <header class="dashboard-header">
         <h1>📊 Dashboard de Análise Social</h1>
-        <p>SENAI "Morvan Figueiredo" — Questionários de Perfil do Aluno</p>
+        <p>SENAI "Morvan Figueiredo" — Perfil e Logística do Aluno</p>
       </header>
 
       <!-- Global Semester Filter & Upload -->
@@ -152,273 +152,141 @@
         </div>
       </div>
 
-      <!-- KPI Cards -->
-      <div class="kpi-grid" id="kpiGrid">
+      <!-- Compact KPI Cards -->
+      <div class="kpi-grid slim" id="kpiGrid">
         <div class="kpi-card animate-in">
-          <div class="kpi-icon">👥</div>
           <div class="kpi-value" id="kpiTotal">—</div>
           <div class="kpi-label">Total de Alunos</div>
         </div>
         <div class="kpi-card animate-in">
-          <div class="kpi-icon">📅</div>
           <div class="kpi-value" id="kpiIdadeMedia">—</div>
           <div class="kpi-label">Idade Média</div>
-          <div class="kpi-sub" id="kpiIdadeRange"></div>
         </div>
         <div class="kpi-card animate-in">
-          <div class="kpi-icon">♂️</div>
-          <div class="kpi-value" id="kpiMasc">—</div>
+          <div class="kpi-value" id="kpiMascPct">—</div>
           <div class="kpi-label">Masculino</div>
-          <div class="kpi-sub" id="kpiMascPct"></div>
         </div>
         <div class="kpi-card animate-in">
-          <div class="kpi-icon">♀️</div>
-          <div class="kpi-value" id="kpiFem">—</div>
+          <div class="kpi-value" id="kpiFemPct">—</div>
           <div class="kpi-label">Feminino</div>
-          <div class="kpi-sub" id="kpiFemPct"></div>
         </div>
-        <div class="kpi-card animate-in">
-          <div class="kpi-icon">💼</div>
-          <div class="kpi-value" id="kpiTrabalham">—</div>
+        <div class="kpi-card animate-in highlight">
+          <div class="kpi-value" id="kpiTrabPct">—</div>
           <div class="kpi-label">Trabalham</div>
-          <div class="kpi-sub" id="kpiTrabPct"></div>
         </div>
-        <div class="kpi-card animate-in">
-          <div class="kpi-icon">👶</div>
-          <div class="kpi-value" id="kpiFilhos">—</div>
+        <div class="kpi-card animate-in highlight">
+          <div class="kpi-value" id="kpiFilhosPct">—</div>
           <div class="kpi-label">Com Filhos</div>
-          <div class="kpi-sub" id="kpiFilhosPct"></div>
         </div>
       </div>
 
-      <!-- ===== DEMOGRAFIA ===== -->
-      <div class="section-header" id="sectionDemografia">
-        <div class="section-icon" style="background: var(--gradient-primary);">👤</div>
-        <h2>Demografia dos Participantes</h2>
-        <div class="section-line"></div>
-      </div>
-
-      <div class="chart-grid cols-2">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Distribuição de Gênero</div>
-          <div class="chart-subtitle">Proporção masculino / feminino / outro</div>
-          <canvas id="chartGenero"></canvas>
+      <!-- ===== 1. PERFIL DO ALUNO ===== -->
+      <div class="section-container animate-in">
+        <div class="section-header">
+          <div class="section-icon" style="background: var(--gradient-primary);">👤</div>
+          <h2>1. Perfil e Demografia</h2>
+          <div class="section-line"></div>
         </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Distribuição por Faixa Etária</div>
-          <div class="chart-subtitle">Histograma de idades dos participantes</div>
-          <canvas id="chartIdade"></canvas>
+        <div class="chart-grid cols-3">
+          <div class="chart-card">
+            <div class="chart-title">Gênero</div>
+            <canvas id="chartGenero"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Faixa Etária</div>
+            <canvas id="chartIdade"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Estado Civil</div>
+            <canvas id="chartEstadoCivil"></canvas>
+          </div>
         </div>
-      </div>
-
-      <div class="chart-grid cols-3">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Estado Civil</div>
-          <div class="chart-subtitle">Proporção por situação</div>
-          <canvas id="chartEstadoCivil"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Participantes com Filhos</div>
-          <div class="chart-subtitle">Sim vs Não</div>
-          <canvas id="chartFilhos"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Distribuição por Região</div>
-          <div class="chart-subtitle">Zona Leste, Norte, Sul, etc.</div>
-          <canvas id="chartRegiao"></canvas>
+        <div class="chart-grid cols-2" style="margin-top: 20px;">
+          <div class="chart-card">
+            <div class="chart-title">Principais Cursos</div>
+            <canvas id="chartCursos"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Escolaridade Atual</div>
+            <canvas id="chartEscolaridade"></canvas>
+          </div>
         </div>
       </div>
 
-      <div class="chart-grid cols-1">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Mapa por Bairro / Cidade</div>
-          <div class="chart-subtitle">Treemap dos bairros mais frequentes</div>
-          <div class="treemap-container" id="treemapBairro"></div>
+      <!-- ===== 2. LOGÍSTICA E ROTINA ===== -->
+      <div class="section-container animate-in">
+        <div class="section-header">
+          <div class="section-icon" style="background: var(--gradient-cool);">🚌</div>
+          <h2>2. Logística e Rotina Diária</h2>
+          <div class="section-line"></div>
+        </div>
+        <div class="chart-grid cols-3">
+          <div class="chart-card">
+            <div class="chart-title">Tipo de Condução</div>
+            <canvas id="chartTiposConducao"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Tempo de Deslocamento</div>
+            <canvas id="chartDeslocamento"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Período de Aula</div>
+            <canvas id="chartPeriodo"></canvas>
+          </div>
+        </div>
+        <div class="chart-grid cols-2" style="margin-top: 20px;">
+          <div class="chart-card">
+            <div class="chart-title">Situação de Trabalho</div>
+            <canvas id="chartTrabalha"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Tipo de Escola Atual</div>
+            <canvas id="chartTipoEscola"></canvas>
+          </div>
         </div>
       </div>
 
-      <!-- ===== EDUCAÇÃO ===== -->
-      <div class="section-header" id="sectionEducacao">
-        <div class="section-icon" style="background: var(--gradient-accent);">🎓</div>
-        <h2>Perfil Educacional e Profissional</h2>
-        <div class="section-line"></div>
-      </div>
-
-      <div class="chart-grid cols-2">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Popularidade dos Cursos</div>
-          <div class="chart-subtitle">Número de alunos por curso oferecido</div>
-          <canvas id="chartCursos"></canvas>
+      <!-- ===== 3. CONTEXTO SOCIAL ===== -->
+      <div class="section-container animate-in">
+        <div class="section-header">
+          <div class="section-icon" style="background: var(--gradient-warm);">🏠</div>
+          <h2>3. Contexto Social e Econômico</h2>
+          <div class="section-line"></div>
         </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Situação de Escolaridade</div>
-          <div class="chart-subtitle">Nível atual de ensino dos participantes</div>
-          <canvas id="chartEscolaridade"></canvas>
+        <div class="chart-grid cols-3">
+          <div class="chart-card">
+            <div class="chart-title">Possui Filhos?</div>
+            <canvas id="chartFilhos"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Renda Familiar</div>
+            <canvas id="chartRenda"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Situação Financeira</div>
+            <canvas id="chartFinanceira"></canvas>
+          </div>
         </div>
-      </div>
-
-      <div class="chart-grid cols-3">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Período de Aula</div>
-          <div class="chart-subtitle">Manhã, Tarde, Integral</div>
-          <canvas id="chartPeriodo"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Trabalha Atualmente?</div>
-          <div class="chart-subtitle">Sim, Não, Trabalhos Informais</div>
-          <canvas id="chartTrabalha"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Tipo de Escola</div>
-          <div class="chart-subtitle">Pública, Particular, Não estuda</div>
-          <canvas id="chartTipoEscola"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-grid cols-1">
-        <div class="chart-card animate-in tall">
-          <div class="chart-title">Motivos para Escolher o Curso</div>
-          <div class="chart-subtitle">Palavras e temas mais mencionados nas respostas abertas</div>
-          <div class="word-cloud-container" id="wordCloud"></div>
-        </div>
-      </div>
-
-      <!-- ===== COMPORTAMENTO ===== -->
-      <div class="section-header" id="sectionComportamento">
-        <div class="section-icon" style="background: var(--gradient-cool);">🍽️</div>
-        <h2>Comportamento e Preferências</h2>
-        <div class="section-line"></div>
-      </div>
-
-      <div class="chart-grid cols-2">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Alimentação no Campus</div>
-          <div class="chart-subtitle">Como os alunos se alimentam durante as aulas</div>
-          <canvas id="chartAlimentacao"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Tempo de Deslocamento</div>
-          <div class="chart-subtitle">Duração da viagem até a Escola SENAI</div>
-          <canvas id="chartDeslocamento"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-grid cols-3">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Atividade Esportiva</div>
-          <div class="chart-subtitle">Frequência de prática esportiva</div>
-          <canvas id="chartEsporte"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Renda Familiar</div>
-          <div class="chart-subtitle">Faixas de renda domiciliar total</div>
-          <canvas id="chartRenda"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Tipo de Residência</div>
-          <div class="chart-subtitle">Própria, Alugada, Cedida</div>
-          <canvas id="chartResidencia"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-grid cols-2">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Situação Financeira</div>
-          <div class="chart-subtitle">Como classificam a situação financeira familiar</div>
-          <canvas id="chartFinanceira"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Religião</div>
-          <div class="chart-subtitle">Distribuição por credo ou culto</div>
-          <canvas id="chartReligiao"></canvas>
-        </div>
-      </div>
-
-      <!-- ===== CORRELAÇÕES ===== -->
-      <div class="section-header" id="sectionCorrelacoes">
-        <div class="section-icon" style="background: var(--gradient-warm);">📈</div>
-        <h2>Análises Cruzadas</h2>
-        <div class="section-line"></div>
-      </div>
-
-      <div class="chart-grid cols-2">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Gênero por Curso</div>
-          <div class="chart-subtitle">Distribuição de gênero dentro de cada curso</div>
-          <canvas id="chartGeneroCurso"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Idade Média por Curso</div>
-          <div class="chart-subtitle">Idade média dos alunos em cada curso</div>
-          <canvas id="chartIdadeCurso"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-grid cols-2">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Pessoas na Residência</div>
-          <div class="chart-subtitle">Distribuição da quantidade de moradores</div>
-          <canvas id="chartPessoasResidencia"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Programa Social por Região</div>
-          <div class="chart-subtitle">Participação em programas sociais por região geográfica</div>
-          <canvas id="chartProgramaSocial"></canvas>
-        </div>
-      </div>
-
-      <!-- ===== TRANSPORTE E EVOLUÇÃO ===== -->
-      <div class="section-header" id="sectionTransporte">
-        <div class="section-icon" style="background: var(--gradient-warm);">🚌</div>
-        <h2>Transporte e Evolução Temporal</h2>
-        <div class="section-line"></div>
-      </div>
-
-      <div class="kpi-grid">
-        <div class="kpi-card animate-in">
-          <div class="kpi-icon">🚉</div>
-          <div class="kpi-value" id="kpiPublicTransport">—</div>
-          <div class="kpi-label">Transporte Público</div>
-          <div class="kpi-sub" id="kpiPublicPct"></div>
-        </div>
-        <div class="kpi-card animate-in">
-          <div class="kpi-icon">🚶</div>
-          <div class="kpi-value" id="kpiActiveTransport">—</div>
-          <div class="kpi-label">Transporte Ativo</div>
-          <div class="kpi-sub" id="kpiActivePct"></div>
-        </div>
-      </div>
-
-      <div class="chart-grid cols-2">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Tipos de Condução Utilizados</div>
-          <div class="chart-subtitle">Detalhamento dos meios de transporte (Geral)</div>
-          <canvas id="chartTiposConducao"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Evolução do Número de Alunos</div>
-          <div class="chart-subtitle">Comparativo entre Semestre Atual vs Anteriores</div>
-          <canvas id="chartEvolucaoSemestre"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-grid cols-2">
-        <div class="chart-card animate-in">
-          <div class="chart-title">Uso de Transporte Público por Semestre</div>
-          <div class="chart-subtitle">Comparação da dependência de transporte público</div>
-          <canvas id="chartTransporteSemestre"></canvas>
-        </div>
-        <div class="chart-card animate-in">
-          <div class="chart-title">Tempo de Deslocamento Médio por Semestre</div>
-          <div class="chart-subtitle">Comparação da média de tempo de viagem percorrida</div>
-          <canvas id="chartDeslocamentoSemestre"></canvas>
+        <div class="chart-grid cols-3" style="margin-top: 20px;">
+          <div class="chart-card">
+            <div class="chart-title">Região de Residência</div>
+            <canvas id="chartRegiao"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Tipo de Moradia</div>
+            <canvas id="chartResidencia"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Religião / Culto</div>
+            <canvas id="chartReligiao"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- Footer -->
       <footer class="dashboard-footer">
-        <p>Dashboard gerado a partir de dados do questionário social do SENAI "Morvan Figueiredo"</p>
-        <p>Total de registros processados: <strong id="footerTotal">0</strong> | Última atualização: Março 2026</p>
+        <p>Dashboard simplificado para análise de precisão — SENAI "Morvan Figueiredo"</p>
+        <p>Total de registros: <strong id="footerTotal">0</strong> | Atualizado em tempo real</p>
       </footer>
     </main>
   </div>

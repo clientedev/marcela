@@ -79,32 +79,32 @@ function processData(rawRows) {
     horaInicio: "Hora de início",
     nome: "Nome do Aluno",
     idade: "Idade",
-    nascimento: "Data de Nascimento (DIA/MÊS/ANO)",
+    nascimento: "Data de Nascimento",
     curso: "Curso",
     estadoCivil: "Estado civil",
     filhos: "Você tem filhos?",
-    telefone: "Informe abaixo o seu número de contato telefônico:",
+    telefone: "número de contato telefônico",
     genero: "Qual o seu sexo?",
-    bairro: "Em qual bairro e município você reside?",
+    bairro: "bairro e município você reside?",
     regiao: "Região",
-    periodo: "Período de aula no SENAI:",
-    escolaridade: "Informe sua situação escolar atual:",
-    horarioEstudo: "Em qual horário você realiza le ensino médio ou superior?",
-    tipoEscola: "Você atualmente estuda em qual tipo de escola:",
-    trabalha: "Você atualmente está trabalhando?",
-    motivosCurso: "Quais foram os principais motivos pelos quais você decidiu fazer este curso? Quais são suas expectativas?",
-    alimentacao: "Com relação a alimentação, você pretende:",
-    tempoDeslocamento: "Qual o tempo aproximado do seu deslocamento até a Escola SENAI?",
-    tipoConducao: "Qual o tipo de condução você utiliza no trajeto Ida/Volta para a Escola SENAI “Morvan Figueiredo” diariamente?",
-    quantidadeConducao: "Quantas conduções você utiliza no trajeto Ida/Volta para a Escola SENAI “Morvan Figueiredo” diariamente?",
-    programaSocial: "Você ou algum integrante da sua família que more na mesma residência, participa de algum programa social",
-    pessoasResidencia: "Incluindo você, quantas pessoas residem na sua casa?",
-    rendaFamiliar: "Renda Familiar total (somando os salários de todas as pessoas que residem na mesma residência):",
-    residencia: "Sua residência é:",
-    situacaoFinanceira: "Como você classificaria a situação financeira da sua família?",
-    religiao: "Qual a sua religião ou culto?",
-    atividadeEsportiva: "Você prática atividade esportiva?",
-    conclusao: "Hora de conclusão" // Optional but helpful
+    periodo: "Período de aula no SENAI",
+    escolaridade: "situação escolar atual",
+    horarioEstudo: "horário você realiza",
+    tipoEscola: "tipo de escola",
+    trabalha: "atualmente está trabalhando?",
+    motivosCurso: "principais motivos pelos quais você decidiu",
+    alimentacao: "alimentação, você pretende",
+    tempoDeslocamento: "tempo aproximado do seu deslocamento",
+    tipoConducao: "tipo de condução você utiliza",
+    quantidadeConducao: "Quantas conduções você utiliza",
+    programaSocial: "participa de algum programa social",
+    pessoasResidencia: "quantas pessoas residem na sua casa",
+    rendaFamiliar: "Renda Familiar total",
+    residencia: "Sua residência é",
+    situacaoFinanceira: "situação financeira da sua família",
+    religiao: "Qual a sua religião",
+    atividadeEsportiva: "atividade esportiva",
+    conclusao: "Hora de conclusão"
   };
 
   allData = rawRows.map((row, idx) => {
@@ -113,8 +113,8 @@ function processData(rawRows) {
       // Fuzzy match for column name if exact not found
       let value = row[columnName];
       if (value === undefined) {
-         // Try finding key that contains part of the string
-         const actualKey = Object.keys(row).find(k => k.toLowerCase().includes(columnName.toLowerCase().slice(0, 20)));
+         // Try finding key that contains the substring (case insensitive)
+         const actualKey = Object.keys(row).find(k => k.toLowerCase().includes(columnName.toLowerCase()));
          value = actualKey ? row[actualKey] : "";
       }
       record[key] = String(value || "").trim();
@@ -172,8 +172,8 @@ function getAgeBand(age) {
 function hasChildren(val) {
   if (!val || val.trim() === '') return 'Não informado';
   const v = val.toLowerCase().trim();
-  if (v === 'nenhum' || v === 'não' || v === 'nao' || v.includes('não')) return 'Não';
-  if (v.includes('sim') || v === '1' || v === '2') return 'Sim';
+  if (v === 'nenhum' || v === 'não' || v === 'nao' || v.includes('não') || v.includes('nao')) return 'Não';
+  if (v.includes('sim') || v === '1' || v === '2' || v.includes('tenho')) return 'Sim';
   return 'Não informado';
 }
 
@@ -192,7 +192,7 @@ function normalizeWork(w) {
   if (!w) return 'N/I';
   const wl = w.toLowerCase();
   if (wl.includes('informal') || wl.includes('informais')) return 'Informal';
-  if (wl === 'sim' || wl.includes('aprendiz') || wl.includes('estagiário') || wl.includes('outro')) return 'Sim';
+  if (wl === 'sim' || wl.includes('aprendiz') || wl.includes('estagiário') || wl.includes('trabalhando') || wl.includes('outro')) return 'Sim';
   if (wl === 'não' || wl === 'nao' || wl.includes('não') || wl.includes('nao')) return 'Não';
   return 'N/I';
 }
@@ -208,16 +208,15 @@ function normalizeEducation(e) {
 function normalizeTransport(val) {
   if (!val) return 'N/I';
   const v = val.toLowerCase();
-  const types = [];
-  if (v.includes('ônibus')) types.push('Ônibus');
-  if (v.includes('metrô')) types.push('Metrô');
-  if (v.includes('trem')) types.push('Trem');
-  if (v.includes('carro')) types.push('Carro');
-  if (v.includes('moto')) types.push('Moto');
-  if (v.includes('a pé') || v.includes('caminhando')) types.push('A pé');
-  if (v.includes('bicicleta')) types.push('Bicicleta');
-  if (v.includes('van')) types.push('Van Escolar');
-  return types.length ? types[0] : 'Outro';
+  if (v.includes('ônibus') || v.includes('onibus')) return 'Ônibus';
+  if (v.includes('metrô') || v.includes('metro')) return 'Metrô';
+  if (v.includes('trem')) return 'Trem';
+  if (v.includes('carro')) return 'Carro';
+  if (v.includes('moto')) return 'Moto';
+  if (v.includes('a pé') || v.includes('caminhando') || v.includes('pe')) return 'A pé';
+  if (v.includes('bicicleta') || v.includes('bike')) return 'Bicicleta';
+  if (v.includes('van')) return 'Van Escolar';
+  return 'Outro';
 }
 
 function getTransportCategory(val) {

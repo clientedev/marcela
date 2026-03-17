@@ -7,6 +7,7 @@
   <title>Dashboard de Análise | SENAI Morvan Figueiredo</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -126,10 +127,30 @@
       <header class="dashboard-header">
         <h1>📊 Dashboard de Análise Social</h1>
         <p>SENAI "Morvan Figueiredo" — Questionários de Perfil do Aluno</p>
+      </header>
+
+      <!-- Global Semester Filter & Upload -->
+      <div class="top-filter-bar animate-in">
+        <div class="upload-section">
+          <label for="excelUpload" class="upload-label">
+            <span class="upload-icon">📁</span>
+            <span class="upload-text">Carregar Excel/CSV</span>
+          </label>
+          <input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display: none;">
+          <div id="fileName" class="file-name">Nenhum arquivo selecionado</div>
+        </div>
+
+        <div class="semester-filter" id="semesterFilterContainer" style="display: none;">
+          <label for="filterSemestre">📅 Semestre:</label>
+          <select id="filterSemestre">
+            <option value="">Todos</option>
+          </select>
+        </div>
+
         <div class="filter-summary" id="filterSummary">
           Exibindo <span class="count" id="filteredCount">0</span> de <span class="count" id="totalCount">0</span> registros
         </div>
-      </header>
+      </div>
 
       <!-- KPI Cards -->
       <div class="kpi-grid" id="kpiGrid">
